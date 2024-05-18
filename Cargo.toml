@@ -1,0 +1,10 @@
+[package]
+name = "gphoto2-web"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gphoto2 = "3.2.3"
+rouille = "3.6.2"
+serde = "1.0.202"
+serde_derive = "1.0.202"

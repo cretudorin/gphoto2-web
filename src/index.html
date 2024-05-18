@@ -1,0 +1,14 @@
+<script>
+   function captureImage() {
+      fetch("http://HOST/capture_image")
+         .then(response => response.json())
+         .then(data => document.getElementById("result").innerText = data.message);
+   }
+</script>
+<form>
+     <button id="form-submit" type="button" onclick="captureImage()">
+        Capture Image
+     </button>
+     <span id="result"></span>
+ </form>
+ 
