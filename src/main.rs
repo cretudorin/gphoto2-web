@@ -1,48 +1,26 @@
-use std::fs;
+use crate::responses::JsonResponse;
+use actix_files as fs;
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use gphoto2::{list::CameraDescriptor, Camera, Context, Result};
+pub mod responses;
 
-use gphoto2::{Camera, Context, Result};
-use rouille::{router, Response};
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-
-#[macro_use]
-extern crate rouille;
-
-fn get_camera() -> Result<Camera> {
-    return Context::new()?.autodetect_camera().wait();
+#[get("/cameras")]
+async fn get_cameras() -> impl Responder {
+    let cameras = Context::new().unwrap().list_cameras();
+    HttpResponse::Ok().json(&JsonResponse {
+        status: 200,
+        message: "foo".to_string(),
+    })
 }
 
-#[derive(Serialize)]
-struct JsonResponse {
-    status: i32,
-    message: String,
-}
-
-#[derive(Serialize)]
-struct JsonEmpty {}
-
-fn main() {
-    let host = "localhost:8081";
-
-    rouille::start_server(format!("{host}"), move |request| {
-        router!(request,
-            (GET) (/) => {
-                rouille::Response::html(fs::read_to_string("./src/index.html").expect("Should have been able to read the file").replace("HOST", host))
-            },
-            (GET) (/capture_image) => {
-                return match get_camera() {
-                    Ok(c) => {
-                        let _ = c.capture_image().wait();
-                        Response::json(&JsonResponse{ status: 200, message: "Success".to_string() })
-                    },
-                    Err(err) => {
-                        return Response::json(&JsonResponse{ status: 500, message: err.to_string() }).with_status_code(500);
-
-                    }
-                };
-            },
-            _ => rouille::Response::empty_404()
-        )
-    });
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(fs::Files::new("/", "./src/static").index_file("index.html"))
+            .service(get_cameras)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }

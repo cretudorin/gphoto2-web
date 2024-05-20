@@ -5,6 +5,6 @@ edition = "2021"
 
 [dependencies]
 gphoto2 = "3.2.3"
-rouille = "3.6.2"
-serde = "1.0.202"
-serde_derive = "1.0.202"
+actix-web = "4"
+serde = { version = "1.0.202", features = ["derive"] }
+actix-files = "0.6.5"
